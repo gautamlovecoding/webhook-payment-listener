@@ -1,0 +1,38 @@
+{
+  "event_id": "evt_ref_004",
+  "event_type": "payment_refunded",
+  "payment_id": "pay_12345",
+  "timestamp": "2025-07-08T14:15:30Z",
+  "payment": {
+    "id": "pay_12345",
+    "amount": 10000,
+    "currency": "INR",
+    "method": "card",
+    "status": "refunded",
+    "refund": {
+      "id": "rfnd_67890",
+      "amount": 10000,
+      "reason": "customer_request",
+      "notes": "Product returned by customer",
+      "processed_at": "2025-07-08T14:15:30Z"
+    },
+    "card": {
+      "last4": "1234",
+      "brand": "visa",
+      "type": "credit"
+    },
+    "customer": {
+      "id": "cust_67890",
+      "email": "customer@example.com"
+    },
+    "metadata": {
+      "order_id": "order_98765",
+      "merchant_ref": "ref_abc123",
+      "return_tracking": "RET123456"
+    }
+  },
+  "provider": {
+    "name": "razorpay",
+    "webhook_id": "whk_razorpay_004"
+  }
+}

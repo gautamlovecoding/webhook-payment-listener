@@ -1,0 +1,613 @@
+{
+  "info": {
+    "name": "Webhook Payment Listener API",
+    "description": "Complete API collection for testing the webhook payment listener system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "webhook-payment-listener-collection"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script to generate HMAC-SHA256 signature",
+          "const secret = pm.environment.get('webhook_secret') || 'test_secret';",
+          "const payload = pm.request.body.raw;",
+          "",
+          "if (payload && payload.length > 0) {",
+          "    const signature = CryptoJS.HmacSHA256(payload, secret).toString(CryptoJS.enc.Hex);",
+          "    pm.request.headers.add({",
+          "        key: 'X-Webhook-Signature',",
+          "        value: 'sha256=' + signature",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "webhook_secret",
+      "value": "test_secret",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check if the server is running and healthy"
+          },
+          "response": []
+        },
+        {
+          "name": "API Documentation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Get API documentation and available endpoints"
+          },
+          "response": []
+        },
+        {
+          "name": "Webhook Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/webhook/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "status"]
+            },
+            "description": "Check webhook service status and recent activity"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Webhook Events",
+      "item": [
+        {
+          "name": "Payment Authorized",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has event data\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('event');",
+                  "    pm.expect(jsonData.event).to.have.property('event_id');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"evt_auth_001\",\n  \"event_type\": \"payment_authorized\",\n  \"payment_id\": \"pay_12345\",\n  \"timestamp\": \"2025-07-08T12:00:00Z\",\n  \"payment\": {\n    \"id\": \"pay_12345\",\n    \"amount\": 10000,\n    \"currency\": \"INR\",\n    \"method\": \"card\",\n    \"status\": \"authorized\",\n    \"card\": {\n      \"last4\": \"1234\",\n      \"brand\": \"visa\",\n      \"type\": \"credit\"\n    },\n    \"customer\": {\n      \"id\": \"cust_67890\",\n      \"email\": \"customer@example.com\"\n    },\n    \"metadata\": {\n      \"order_id\": \"order_98765\",\n      \"merchant_ref\": \"ref_abc123\"\n    }\n  },\n  \"provider\": {\n    \"name\": \"razorpay\",\n    \"webhook_id\": \"whk_razorpay_001\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Send a payment authorized webhook event"
+          },
+          "response": []
+        },
+        {
+          "name": "Payment Captured",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has event data\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('event');",
+                  "    pm.expect(jsonData.event).to.have.property('event_id');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"evt_cap_002\",\n  \"event_type\": \"payment_captured\",\n  \"payment_id\": \"pay_12345\",\n  \"timestamp\": \"2025-07-08T12:01:23Z\",\n  \"payment\": {\n    \"id\": \"pay_12345\",\n    \"amount\": 10000,\n    \"currency\": \"INR\",\n    \"method\": \"card\",\n    \"status\": \"captured\",\n    \"captured_amount\": 10000,\n    \"fee\": 200,\n    \"tax\": 36,\n    \"card\": {\n      \"last4\": \"1234\",\n      \"brand\": \"visa\",\n      \"type\": \"credit\"\n    },\n    \"customer\": {\n      \"id\": \"cust_67890\",\n      \"email\": \"customer@example.com\"\n    },\n    \"metadata\": {\n      \"order_id\": \"order_98765\",\n      \"merchant_ref\": \"ref_abc123\"\n    },\n    \"settlement\": {\n      \"expected_date\": \"2025-07-09\",\n      \"amount\": 9764\n    }\n  },\n  \"provider\": {\n    \"name\": \"razorpay\",\n    \"webhook_id\": \"whk_razorpay_002\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Send a payment captured webhook event"
+          },
+          "response": []
+        },
+        {
+          "name": "Payment Failed",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has event data\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('event');",
+                  "    pm.expect(jsonData.event).to.have.property('event_id');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"evt_fail_003\",\n  \"event_type\": \"payment_failed\",\n  \"payment_id\": \"pay_54321\",\n  \"timestamp\": \"2025-07-08T12:30:45Z\",\n  \"payment\": {\n    \"id\": \"pay_54321\",\n    \"amount\": 5000,\n    \"currency\": \"USD\",\n    \"method\": \"card\",\n    \"status\": \"failed\",\n    \"error\": {\n      \"code\": \"card_declined\",\n      \"description\": \"Your card was declined\",\n      \"reason\": \"insufficient_funds\"\n    },\n    \"card\": {\n      \"last4\": \"9876\",\n      \"brand\": \"mastercard\",\n      \"type\": \"debit\"\n    },\n    \"customer\": {\n      \"id\": \"cust_11111\",\n      \"email\": \"john.doe@example.com\"\n    },\n    \"metadata\": {\n      \"order_id\": \"order_11223\",\n      \"merchant_ref\": \"ref_xyz789\",\n      \"retry_count\": 1\n    },\n    \"attempts\": [\n      {\n        \"timestamp\": \"2025-07-08T12:30:30Z\",\n        \"error_code\": \"card_declined\",\n        \"error_description\": \"Card declined by issuer\"\n      }\n    ]\n  },\n  \"provider\": {\n    \"name\": \"paypal\",\n    \"webhook_id\": \"whk_paypal_003\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Send a payment failed webhook event"
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Event (Idempotency Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates duplicate\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('duplicate');",
+                  "    pm.expect(jsonData.duplicate).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"evt_auth_001\",\n  \"event_type\": \"payment_authorized\",\n  \"payment_id\": \"pay_12345\",\n  \"timestamp\": \"2025-07-08T12:00:00Z\",\n  \"payment\": {\n    \"id\": \"pay_12345\",\n    \"amount\": 10000,\n    \"currency\": \"INR\",\n    \"method\": \"card\",\n    \"status\": \"authorized\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Test idempotency by sending the same event_id again"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "Invalid Signature",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Override the signature with an invalid one",
+                  "pm.request.headers.add({",
+                  "    key: 'X-Webhook-Signature',",
+                  "    value: 'invalid_signature'",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates forbidden\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.error).to.equal('Forbidden');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"evt_invalid_001\",\n  \"event_type\": \"payment_authorized\",\n  \"payment_id\": \"pay_invalid\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Test webhook with invalid signature"
+          },
+          "response": []
+        },
+        {
+          "name": "Missing Signature",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Disable signature generation for this request",
+                  "pm.request.headers.remove('X-Webhook-Signature');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates missing signature\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "    pm.expect(jsonData.message).to.include('signature is required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"evt_no_sig_001\",\n  \"event_type\": \"payment_authorized\",\n  \"payment_id\": \"pay_no_sig\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Test webhook without signature header"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates JSON error\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ invalid json }"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Test webhook with invalid JSON"
+          },
+          "response": []
+        },
+        {
+          "name": "Missing Required Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates validation error\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.error).to.include('Missing required fields');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"evt_incomplete_001\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhook/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhook", "payments"]
+            },
+            "description": "Test webhook with missing required fields"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment Events",
+      "item": [
+        {
+          "name": "Get Payment Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 404\", function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Response is an array\", function () {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.be.an('array');",
+                  "    });",
+                  "",
+                  "    pm.test(\"Events have required fields\", function () {",
+                  "        const jsonData = pm.response.json();",
+                  "        if (jsonData.length > 0) {",
+                  "            pm.expect(jsonData[0]).to.have.property('event_type');",
+                  "            pm.expect(jsonData[0]).to.have.property('received_at');",
+                  "        }",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/pay_12345/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "pay_12345", "events"]
+            },
+            "description": "Get all events for payment ID pay_12345"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Events for Non-existent Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates no events found\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.error).to.equal('No events found');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/pay_nonexistent/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "pay_nonexistent", "events"]
+            },
+            "description": "Get events for a payment ID that doesn't exist"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 404\", function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Response has payment details\", function () {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('payment_id');",
+                  "        pm.expect(jsonData).to.have.property('total_events');",
+                  "        pm.expect(jsonData).to.have.property('events');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/pay_12345",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "pay_12345"]
+            },
+            "description": "Get detailed information for payment pay_12345"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Payments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has payments array\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('payments');",
+                  "    pm.expect(jsonData.payments).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has pagination info\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('pagination');",
+                  "    pm.expect(jsonData.pagination).to.have.property('limit');",
+                  "    pm.expect(jsonData.pagination).to.have.property('offset');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Get all payments with pagination"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

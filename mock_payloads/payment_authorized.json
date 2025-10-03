@@ -1,0 +1,30 @@
+{
+  "event_id": "evt_auth_001",
+  "event_type": "payment_authorized",
+  "payment_id": "pay_12345",
+  "timestamp": "2025-07-08T12:00:00Z",
+  "payment": {
+    "id": "pay_12345",
+    "amount": 10000,
+    "currency": "INR",
+    "method": "card",
+    "status": "authorized",
+    "card": {
+      "last4": "1234",
+      "brand": "visa",
+      "type": "credit"
+    },
+    "customer": {
+      "id": "cust_67890",
+      "email": "customer@example.com"
+    },
+    "metadata": {
+      "order_id": "order_98765",
+      "merchant_ref": "ref_abc123"
+    }
+  },
+  "provider": {
+    "name": "razorpay",
+    "webhook_id": "whk_razorpay_001"
+  }
+}

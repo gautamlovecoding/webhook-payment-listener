@@ -1,0 +1,39 @@
+{
+  "event_id": "evt_disp_005",
+  "event_type": "payment_disputed",
+  "payment_id": "pay_77777",
+  "timestamp": "2025-07-08T16:45:12Z",
+  "payment": {
+    "id": "pay_77777",
+    "amount": 15000,
+    "currency": "USD",
+    "method": "card",
+    "status": "disputed",
+    "dispute": {
+      "id": "disp_88888",
+      "amount": 15000,
+      "reason_code": "fraud",
+      "reason_description": "Unauthorized transaction",
+      "status": "under_review",
+      "evidence_due_by": "2025-07-15T23:59:59Z",
+      "created_at": "2025-07-08T16:45:12Z"
+    },
+    "card": {
+      "last4": "5555",
+      "brand": "visa",
+      "type": "credit"
+    },
+    "customer": {
+      "id": "cust_22222",
+      "email": "disputed@example.com"
+    },
+    "metadata": {
+      "order_id": "order_33445",
+      "merchant_ref": "ref_disp001"
+    }
+  },
+  "provider": {
+    "name": "paypal",
+    "webhook_id": "whk_paypal_005"
+  }
+}

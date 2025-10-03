@@ -1,0 +1,43 @@
+{
+  "event_id": "evt_fail_003",
+  "event_type": "payment_failed",
+  "payment_id": "pay_54321",
+  "timestamp": "2025-07-08T12:30:45Z",
+  "payment": {
+    "id": "pay_54321",
+    "amount": 5000,
+    "currency": "USD",
+    "method": "card",
+    "status": "failed",
+    "error": {
+      "code": "card_declined",
+      "description": "Your card was declined",
+      "reason": "insufficient_funds"
+    },
+    "card": {
+      "last4": "9876",
+      "brand": "mastercard",
+      "type": "debit"
+    },
+    "customer": {
+      "id": "cust_11111",
+      "email": "john.doe@example.com"
+    },
+    "metadata": {
+      "order_id": "order_11223",
+      "merchant_ref": "ref_xyz789",
+      "retry_count": 1
+    },
+    "attempts": [
+      {
+        "timestamp": "2025-07-08T12:30:30Z",
+        "error_code": "card_declined",
+        "error_description": "Card declined by issuer"
+      }
+    ]
+  },
+  "provider": {
+    "name": "paypal",
+    "webhook_id": "whk_paypal_003"
+  }
+}
